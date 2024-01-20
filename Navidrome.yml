@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: navidrome
+  namespace: navidrome
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: navidrome
+  template:
+    metadata:
+      labels:
+        app: navidrome
+    spec:
+      containers:
+        - name: navidrome
+          image: deluan/navidrome
+          volumeMounts:
+            - name: music-data
+              mountPath: /music
+            - name: navidrome-data
+              mountPath: /data
+      volumes:
+        - name: music-data
+          persistentVolumeClaim:
+            claimName: music-data
+        - name: navidrome-data
+          persistentVolumeClaim:
+            claimName: navidrome-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: navidrome
+  namespace: navidrome
+spec:
+  ports:
+    - port: 4533
+      targetPort: 4533
+  selector:
+    app: navidrome
+  type: LoadBalancer
